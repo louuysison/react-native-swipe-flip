@@ -62,9 +62,7 @@ class SwipeFlip extends Component {
         const sgs = new SimpleGesture(evt, gestureState);
 
         swipeDirection = sgs.isSwipeLeft() ? 'left' :
-                             sgs.isSwipeRight() ? 'right' :
-                             sgs.isSwipeUp() ? 'up' :
-                             sgs.isSwipeDown() ? 'down' : null;
+                             sgs.isSwipeRight() ? 'right' : null;
 
         if(swipeDirection) {
             this.setState({ rotateProperty: (swipeDirection === 'left' || swipeDirection === 'right') ? 'rotateY' : 'rotateX' });
