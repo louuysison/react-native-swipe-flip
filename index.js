@@ -39,9 +39,9 @@ class SwipeFlip extends Component {
     componentWillMount() {
         this._panResponder = PanResponder.create({
             onStartShouldSetPanResponder: (evt, gestureState) => true,
-            onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+            onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
             onMoveShouldSetPanResponder: (evt, gestureState) => true,
-            onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+            onMoveShouldSetPanResponderCapture: (evt, gestureState) => false,
             onPanResponderGrant: (evt, gestureState) => {
                 // do stuff on start -- unused
             },
@@ -49,7 +49,9 @@ class SwipeFlip extends Component {
                 // do stuff on move -- unused
             },
             onPanResponderTerminationRequest: (evt, gestureState) => true,
-            onPanResponderRelease: (evt, gestureState) => { this._onSwipe(evt, gestureState); },
+            onPanResponderRelease: (evt, gestureState) => {
+              this._onSwipe(evt, gestureState);
+            },
             onPanResponderTerminate: (evt, gestureState) => {
             },
             onShouldBlockNativeResponder: (evt, gestureState) => {
