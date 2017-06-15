@@ -9,15 +9,16 @@ const { View, Easing, StyleSheet, Animated, PanResponder } = ReactNative;
 import SimpleGesture from 'react-native-simple-gesture';
 
 // Not exported
-var rotation = {
-    frontRotation: 0,
-    backRotation: 0.5
-};
 var swipeDirection = null;
 
 class SwipeFlip extends Component {
     constructor(props) {
         super(props);
+
+        const rotation = {
+            frontRotation: 0,
+            backRotation: 0.5
+        };
 
         const frontRotationAnimatedValue = new Animated.Value(rotation.frontRotation);
         const backRotationAnimatedValue = new Animated.Value(rotation.backRotation);
@@ -31,6 +32,7 @@ class SwipeFlip extends Component {
             backRotationAnimatedValue,
             frontRotation,
             backRotation,
+            rotation,
             isFlipped: props.isFlipped,
             rotateProperty: 'rotateY'
         };
@@ -73,23 +75,32 @@ class SwipeFlip extends Component {
     }
 
     _getTargetRenderState(swipeDirection) {
-        rotation = swipeDirection ? {
-            frontRotation: (swipeDirection === 'right' || swipeDirection === 'up') ? rotation.frontRotation + 0.5 : rotation.frontRotation - 0.5,
-            backRotation: (swipeDirection === 'right' || swipeDirection === 'up') ? rotation.backRotation + 0.5 : rotation.backRotation - 0.5
-        } : rotation;
+        const rotation = swipeDirection ? {
+            frontRotation: (swipeDirection === 'right' || swipeDirection === 'up') ? this.state.rotation.frontRotation + 0.5 : this.state.rotation.frontRotation - 0.5,
+            backRotation: (swipeDirection === 'right' || swipeDirection === 'up') ? this.state.rotation.backRotation + 0.5 : this.state.rotation.backRotation - 0.5
+        } : this.state.rotation;
 
+        this.setState({rotation: rotation})
         return rotation;
+    }
+
+    _getFrontRotation() {
+      return this.state.frontRotation;
+    }
+
+    _getBackRotation() {
+      return this.state.backRotation;
     }
 
     render() {
         return (
             <View {...this.props} { ...this._panResponder.panHandlers }>
                 <Animated.View pointerEvents={ this.state.isFlipped ? 'none' : 'auto' }
-                               style={[ styles.flippableView, { transform: [{ perspective: this.props.perspective }, { [this.state.rotateProperty]: this.state.frontRotation }] } ]}>
+                               style={[ styles.flippableView, { transform: [{ perspective: this.props.perspective }, { [this.state.rotateProperty]: this._getFrontRotation() }] } ]}>
                     { this.props.front }
                 </Animated.View>
                 <Animated.View pointerEvents={ this.state.isFlipped ? 'auto' : 'none' }
-                               style={[ styles.flippableView, { transform: [{ perspective: this.props.perspective }, {[this.state.rotateProperty]: this.state.backRotation}] } ]}>
+                               style={[ styles.flippableView, { transform: [{ perspective: this.props.perspective }, {[this.state.rotateProperty]: this._getBackRotation() }] } ]}>
                     { this.props.back }
                 </Animated.View>
             </View>
