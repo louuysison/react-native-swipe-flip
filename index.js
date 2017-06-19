@@ -1,65 +1,97 @@
 'use strict';
 
-import React from 'react';
-const { Component, PropTypes } = React;
+import React, { Component, PropTypes } from 'react';
 
-import ReactNative from 'react-native';
-const { View, Easing, StyleSheet, Animated, PanResponder } = ReactNative;
+import {
+  View,
+  Easing,
+  StyleSheet,
+  Animated,
+  PanResponder,
+  Platform,
+} from 'react-native';
 
 import SimpleGesture from 'react-native-simple-gesture';
 
 // Not exported
 var swipeDirection = null;
 
-class SwipeFlip extends Component {
-    constructor(props) {
-        super(props);
+export default class SwipeFlip extends Component {
+  constructor(props) {
+    super(props);
 
-        const rotation = {
-            frontRotation: 0,
-            backRotation: 0.5
-        };
+    const rotation = {
+        frontRotation: 0,
+        backRotation: 0.5,
+        frontOpacity: 1,
+        backOpacity: 0,
+    };
 
-        const frontRotationAnimatedValue = new Animated.Value(rotation.frontRotation);
-        const backRotationAnimatedValue = new Animated.Value(rotation.backRotation);
+    const frontRotationAnimatedValue = new Animated.Value(rotation.frontRotation);
+    const backRotationAnimatedValue = new Animated.Value(rotation.backRotation);
 
-        const interpolationConfig = { inputRange: [0, 1], outputRange: ['0deg', '360deg'] };
-        const frontRotation = frontRotationAnimatedValue.interpolate(interpolationConfig);
-        const backRotation = backRotationAnimatedValue.interpolate(interpolationConfig);
+    const frontOpacityAnimatedValue = new Animated.Value(rotation.frontOpacity);
+    const backOpacityAnimatedValue = new Animated.Value(rotation.backOpacity);
 
-        this.state = {
-            frontRotationAnimatedValue,
-            backRotationAnimatedValue,
-            frontRotation,
-            backRotation,
-            rotation,
-            isFlipped: props.isFlipped,
-            rotateProperty: 'rotateY'
-        };
+    const interpolationConfig = { inputRange: [0, 1], outputRange: ['0deg', '360deg'] };
+    const frontRotation = frontRotationAnimatedValue.interpolate(interpolationConfig);
+    const backRotation = backRotationAnimatedValue.interpolate(interpolationConfig);
+
+    const opacityInterpolationConfig = { inputRange: [0, 1], outputRange: [0, 1] };
+    const frontOpacity = frontOpacityAnimatedValue.interpolate(opacityInterpolationConfig);
+    const backOpacity = backOpacityAnimatedValue.interpolate(opacityInterpolationConfig);
+
+    this.state = {
+        frontRotationAnimatedValue,
+        backRotationAnimatedValue,
+        frontRotation,
+        backRotation,
+        rotation,
+        isFlipped: props.isFlipped,
+        rotateProperty: 'rotateY'
+    };
+
+    if (Platform.OS === 'android') {
+      Object.assign(this.state, {
+        frontOpacityAnimatedValue,
+        backOpacityAnimatedValue,
+        frontOpacity,
+        backOpacity
+      });
     }
+  }
 
-    componentWillMount() {
-        this._panResponder = PanResponder.create({
-            onStartShouldSetPanResponder: (evt, gestureState) => true,
-            onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
-            onMoveShouldSetPanResponder: (evt, gestureState) => true,
-            onMoveShouldSetPanResponderCapture: (evt, gestureState) => false,
-            onPanResponderGrant: (evt, gestureState) => {
-                // do stuff on start -- unused
-            },
-            onPanResponderMove: (evt, gestureState) => {
-                // do stuff on move -- unused
-            },
-            onPanResponderTerminationRequest: (evt, gestureState) => true,
-            onPanResponderRelease: (evt, gestureState) => {
-              this._onSwipe(evt, gestureState);
-            },
-            onPanResponderTerminate: (evt, gestureState) => {
-            },
-            onShouldBlockNativeResponder: (evt, gestureState) => {
-                return true;
+  componentWillMount() {
+      this._panResponder = PanResponder.create({
+          onStartShouldSetPanResponder: (evt, gestureState) => {
+            if (
+              Platform.OS == 'android'
+              && (gestureState.dx < 1 && gestureState.dx > -1)
+              && (gestureState.dy < 1 && gestureState.dy > -1)
+            ) {
+              return false;
             }
-        });
+            return true;
+          },
+          onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
+          onMoveShouldSetPanResponder: (evt, gestureState) => true,
+          onMoveShouldSetPanResponderCapture: (evt, gestureState) => false,
+          onPanResponderGrant: (evt, gestureState) => {
+              // do stuff on start -- unused
+          },
+          onPanResponderMove: (evt, gestureState) => {
+              // do stuff on move -- unused
+          },
+          onPanResponderTerminationRequest: (evt, gestureState) => true,
+          onPanResponderRelease: (evt, gestureState) => {
+            this._onSwipe(evt, gestureState);
+          },
+          onPanResponderTerminate: (evt, gestureState) => {
+          },
+          onShouldBlockNativeResponder: (evt, gestureState) => {
+              return true;
+          }
+      });
     }
 
     _onSwipe(evt, gestureState) {
@@ -75,14 +107,17 @@ class SwipeFlip extends Component {
     }
 
     _getTargetRenderState(swipeDirection) {
-        const rotation = swipeDirection ? {
-            frontRotation: (swipeDirection === 'right' || swipeDirection === 'up') ? this.state.rotation.frontRotation + 0.5 : this.state.rotation.frontRotation - 0.5,
-            backRotation: (swipeDirection === 'right' || swipeDirection === 'up') ? this.state.rotation.backRotation + 0.5 : this.state.rotation.backRotation - 0.5
-        } : this.state.rotation;
+      const rotation = swipeDirection ? {
+          frontRotation: (swipeDirection === 'right' || swipeDirection === 'up') ? this.state.rotation.frontRotation + 0.5 : this.state.rotation.frontRotation - 0.5,
+          backRotation: (swipeDirection === 'right' || swipeDirection === 'up') ? this.state.rotation.backRotation + 0.5 : this.state.rotation.backRotation - 0.5,
+          frontOpacity: this.state.rotation.backOpacity,
+          backOpacity: this.state.rotation.frontOpacity,
+      } : this.state.rotation;
 
-        this.setState({rotation: rotation})
-        return rotation;
-    }
+      this.setState({rotation: rotation})
+      return rotation;
+
+    };
 
     _getFrontRotation() {
       return this.state.frontRotation;
@@ -95,13 +130,40 @@ class SwipeFlip extends Component {
     render() {
         return (
             <View {...this.props} { ...this._panResponder.panHandlers }>
-                <Animated.View pointerEvents={ this.state.isFlipped ? 'none' : 'auto' }
-                               style={[ styles.flippableView, { transform: [{ perspective: this.props.perspective }, { [this.state.rotateProperty]: this._getFrontRotation() }] } ]}>
-                    { this.props.front }
+                <Animated.View
+                  pointerEvents={ this.state.isFlipped ? 'none' : 'auto' }
+                  style={[
+                    styles.flippableView,
+                    Platform.select({
+                     android: {
+                       opacity: this.state.frontOpacity
+                     }
+                    }),
+                    {
+                     transform: [
+                       { perspective: this.props.perspective },
+                       { [this.state.rotateProperty]: this._getFrontRotation() }
+                     ]
+                    } ]}>
+                  { this.props.front }
                 </Animated.View>
-                <Animated.View pointerEvents={ this.state.isFlipped ? 'auto' : 'none' }
-                               style={[ styles.flippableView, { transform: [{ perspective: this.props.perspective }, {[this.state.rotateProperty]: this._getBackRotation() }] } ]}>
-                    { this.props.back }
+                <Animated.View
+                  pointerEvents={ this.state.isFlipped ? 'auto' : 'none' }
+                  style={[
+                    styles.flippableView,
+                    Platform.select({
+                      android: {
+                        opacity: this.state.backOpacity
+                      }
+                    }),
+                    {
+                      transform: [
+                        { perspective: this.props.perspective },
+                        {[this.state.rotateProperty]: this._getBackRotation() }
+                      ]
+                    }
+                  ]}>
+                  { this.props.back }
                 </Animated.View>
             </View>
         );
@@ -116,14 +178,24 @@ class SwipeFlip extends Component {
 
         const nextIsFlipped = !this.state.isFlipped;
 
-        const { frontRotation, backRotation } = this._getTargetRenderState(swipeDirection);
+        const { frontRotation, backRotation, frontOpacity, backOpacity } = this._getTargetRenderState(swipeDirection);
+
+        let animations = [
+          this._animateValue(this.state.frontRotationAnimatedValue, frontRotation, this.props.flipEasing),
+          this._animateValue(this.state.backRotationAnimatedValue, backRotation, this.props.flipEasing)
+        ]
+
+        if (Platform.OS === 'android') {
+          animations = [
+            ...animations,
+            this._animateValue(this.state.frontOpacityAnimatedValue, frontOpacity, this.props.flipEasing, 100),
+            this._animateValue(this.state.backOpacityAnimatedValue, backOpacity, this.props.flipEasing, 100)
+          ];
+        }
 
         setImmediate(() => {
             requestAnimationFrame(() => {
-                Animated.parallel([
-                    this._animateValue(this.state.frontRotationAnimatedValue, frontRotation, this.props.flipEasing),
-                    this._animateValue(this.state.backRotationAnimatedValue, backRotation, this.props.flipEasing)
-                ]).start(k => {
+                Animated.parallel(animations).start(k => {
                     if (!k.finished) { return; }
 
                     this.setState({ isFlipped: nextIsFlipped });
@@ -133,13 +205,14 @@ class SwipeFlip extends Component {
         });
     }
 
-    _animateValue(animatedValue, toValue, easing) {
+    _animateValue(animatedValue, toValue, easing, delay = 0) {
         return Animated.timing(
             animatedValue,
             {
                 toValue: toValue,
                 duration: this.props.flipDuration,
-                easing: easing
+                easing: easing,
+                delay: delay,
             }
         );
     }
@@ -175,5 +248,3 @@ const styles = StyleSheet.create({
         backfaceVisibility: 'hidden'
     }
 });
-
-module.exports = SwipeFlip;
