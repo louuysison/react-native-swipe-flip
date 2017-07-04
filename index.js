@@ -169,8 +169,8 @@ export default class SwipeFlip extends Component {
         );
     }
 
-    flip(swipeDirection) {
-        this.props.onFlip();
+    flip(swipeDirection, auto = false) {
+        if (!auto) this.props.onFlip();
 
         if( ['up', 'down', 'left', 'right'].indexOf(swipeDirection) === -1 ) {
             swipeDirection = 'right';
@@ -199,7 +199,7 @@ export default class SwipeFlip extends Component {
                     if (!k.finished) { return; }
 
                     this.setState({ isFlipped: nextIsFlipped });
-                    this.props.onFlipped(nextIsFlipped);
+                    if (!auto) this.props.onFlipped(nextIsFlipped);
                 });
             });
         });
