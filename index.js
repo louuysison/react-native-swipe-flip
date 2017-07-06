@@ -73,9 +73,15 @@ export default class SwipeFlip extends Component {
             }
             return true;
           },
-          onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
-          onMoveShouldSetPanResponder: (evt, gestureState) => true,
-          onMoveShouldSetPanResponderCapture: (evt, gestureState) => false,
+          onStartShouldSetPanResponderCapture: (evt, gestureState) => {
+            return gestureState.dx != 0 && gestureState.dy != 0;
+          },
+          onMoveShouldSetPanResponder: (evt, gestureState) => {
+            return gestureState.dx != 0 && gestureState.dy != 0;
+          },
+          onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
+            return gestureState.dx != 0 && gestureState.dy != 0;
+          },
           onPanResponderGrant: (evt, gestureState) => {
               // do stuff on start -- unused
           },
