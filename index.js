@@ -16,6 +16,8 @@ import SimpleGesture from 'react-native-simple-gesture';
 // Not exported
 var swipeDirection = null;
 
+var pressAction = null;
+
 export default class SwipeFlip extends Component {
   constructor(props) {
     super(props);
@@ -76,9 +78,7 @@ export default class SwipeFlip extends Component {
           onStartShouldSetPanResponderCapture: (evt, gestureState) => {
             return gestureState.dx != 0 && gestureState.dy != 0;
           },
-          onMoveShouldSetPanResponder: (evt, gestureState) => {
-            return gestureState.dx != 0 && gestureState.dy != 0;
-          },
+          onMoveShouldSetPanResponder: (evt, gestureState) => true,
           onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
             return gestureState.dx != 0 && gestureState.dy != 0;
           },
@@ -90,7 +90,13 @@ export default class SwipeFlip extends Component {
           },
           onPanResponderTerminationRequest: (evt, gestureState) => true,
           onPanResponderRelease: (evt, gestureState) => {
-            this._onSwipe(evt, gestureState);
+            if(gestureState.dx == 0 && gestureState.dy == 0) {
+              if(this.props.onPress){
+                this.props.onPress();
+              }
+            } else {
+              this._onSwipe(evt, gestureState);
+            }
           },
           onPanResponderTerminate: (evt, gestureState) => {
           },
