@@ -76,11 +76,19 @@ export default class SwipeFlip extends Component {
             return true;
           },
           onStartShouldSetPanResponderCapture: (evt, gestureState) => {
-            return gestureState.dx != 0 && gestureState.dy != 0;
+            return false
           },
-          onMoveShouldSetPanResponder: (evt, gestureState) => true,
+          onMoveShouldSetPanResponder: (evt, gestureState) => {
+            if (gestureState.dx > 1 || gestureState.dx < -1) {
+              return true;
+            }
+            return false;
+          },
           onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
-            return gestureState.dx != 0 && gestureState.dy != 0;
+            if (gestureState.dx > 1 || gestureState.dx < -1) {
+              return true;
+            }
+            return false;
           },
           onPanResponderGrant: (evt, gestureState) => {
               // do stuff on start -- unused
@@ -90,7 +98,8 @@ export default class SwipeFlip extends Component {
           },
           onPanResponderTerminationRequest: (evt, gestureState) => true,
           onPanResponderRelease: (evt, gestureState) => {
-            if(gestureState.dx == 0 && gestureState.dy == 0) {
+            if(gestureState.dx < 2 && gestureState.dx > -2 &&
+              gestureState.dy < 2 && gestureState.dy > -2) {
               if(this.props.onPress){
                 this.props.onPress();
               }
