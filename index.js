@@ -68,8 +68,7 @@ export default class SwipeFlip extends Component {
           onStartShouldSetPanResponder: (evt, gestureState) => {
             if (
               Platform.OS == 'android'
-              && (gestureState.dx < 1 && gestureState.dx > -1)
-              && (gestureState.dy < 1 && gestureState.dy > -1)
+              && (gestureState.dy > 1 || gestureState.dy < -1)
             ) {
               return false;
             }
@@ -79,16 +78,18 @@ export default class SwipeFlip extends Component {
             return false
           },
           onMoveShouldSetPanResponder: (evt, gestureState) => {
-            if (gestureState.dx > 1 || gestureState.dx < -1) {
-              return true;
+            console.log(gestureState.dy);
+            if (gestureState.dy > 1 || gestureState.dy < -1) {
+              return false;
             }
-            return false;
+            return true;
           },
           onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
-            if (gestureState.dx > 1 || gestureState.dx < -1) {
-              return true;
+            console.log(gestureState.dy);
+            if (gestureState.dy > 1 || gestureState.dy < -1) {
+              return false;
             }
-            return false;
+            return true;
           },
           onPanResponderGrant: (evt, gestureState) => {
               // do stuff on start -- unused
@@ -98,8 +99,8 @@ export default class SwipeFlip extends Component {
           },
           onPanResponderTerminationRequest: (evt, gestureState) => true,
           onPanResponderRelease: (evt, gestureState) => {
-            if(gestureState.dx < 2 && gestureState.dx > -2 &&
-              gestureState.dy < 2 && gestureState.dy > -2) {
+            if(Math.abs(gestureState.vx) < 0.1 &&
+              Math.abs(gestureState.vy) < 0.1) {
               if(this.props.onPress){
                 this.props.onPress();
               }
