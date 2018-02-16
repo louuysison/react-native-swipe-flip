@@ -78,14 +78,18 @@ export default class SwipeFlip extends Component {
             return false
           },
           onMoveShouldSetPanResponder: (evt, gestureState) => {
-            console.log(gestureState.dy);
+            if (this.state.isFlipped && Math.abs(gestureState.dx) < 1){
+              return false;
+            }
             if (gestureState.dy > 1 || gestureState.dy < -1) {
               return false;
             }
             return true;
           },
           onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
-            console.log(gestureState.dy);
+            if (this.state.isFlipped && Math.abs(gestureState.dx) < 1){
+              return false;
+            }
             if (gestureState.dy > 1 || gestureState.dy < -1) {
               return false;
             }
