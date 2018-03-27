@@ -66,13 +66,8 @@ export default class SwipeFlip extends Component {
   componentWillMount() {
       this._panResponder = PanResponder.create({
           onStartShouldSetPanResponder: (evt, gestureState) => {
-            if (
-              Platform.OS == 'android'
-              && (gestureState.dy > 1 || gestureState.dy < -1)
-            ) {
-              return false;
-            }
-            return true;
+
+            return Platform.OS === 'android' ? false : true;
           },
           onStartShouldSetPanResponderCapture: (evt, gestureState) => {
             return false
@@ -103,8 +98,8 @@ export default class SwipeFlip extends Component {
           },
           onPanResponderTerminationRequest: (evt, gestureState) => true,
           onPanResponderRelease: (evt, gestureState) => {
-            if(Math.abs(gestureState.vx) < 0.1 &&
-              Math.abs(gestureState.vy) < 0.1) {
+            if(Math.abs(gestureState.dx) < 2 &&
+              Math.abs(gestureState.dy) < 2) {
               if(this.props.onPress){
                 this.props.onPress();
               }
