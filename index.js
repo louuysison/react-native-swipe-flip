@@ -11,6 +11,7 @@ import {
   Animated,
   PanResponder,
   Platform,
+  ViewPropTypes,
 } from 'react-native';
 
 import SimpleGesture from 'react-native-simple-gesture';
@@ -251,7 +252,7 @@ SwipeFlip.defaultProps = {
 };
 
 SwipeFlip.propTypes = {
-    style: View.propTypes.style,
+    style: ViewPropTypes.style,
     flipDuration: PropTypes.number,
     flipEasing: PropTypes.func,
     front: PropTypes.object,
